@@ -1,6 +1,6 @@
-package com.filiaiev.orderservice.model;
+package com.filiaiev.orderservice.repository.entity.order;
 
-public enum ShippingStatus {
+public enum OrderStatusDO {
 
     AWAITING_WAREHOUSE_SHIPPING,
     RECEIVED_AT_WAREHOUSE,
@@ -11,5 +11,6 @@ public enum ShippingStatus {
     LOADED,
     ON_ITS_WAY,
     ARRIVED_AT_DESTINATION_AIRPORT,
-    READY_FOR_COLLECTION
+    READY_FOR_COLLECTION,
+    TERMINATED
 }
