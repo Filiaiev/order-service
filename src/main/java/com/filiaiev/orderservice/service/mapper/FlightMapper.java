@@ -1,11 +1,13 @@
 package com.filiaiev.orderservice.service.mapper;
 
-import com.filiaiev.orderservice.model.flight.FlightCapacity;
-import com.filiaiev.orderservice.repository.entity.flight.FlightCapacityDO;
+import com.filiaiev.orderservice.model.flight.Flight;
+import com.filiaiev.orderservice.repository.entity.flight.FlightDO;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface FlightMapper {
 
-    FlightCapacity mapFlightCapacityDOToFlightCapacity(FlightCapacityDO flightCapacityDO);
+    @Mapping(target = "chargeableZoneRouteId", source = "flightRoute.chargeableZoneRouteId")
+    Flight mapFlightDOToFlight(FlightDO flightDO);
 }

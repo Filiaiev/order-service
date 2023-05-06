@@ -1,11 +1,9 @@
 package com.filiaiev.orderservice.repository;
 
-import com.filiaiev.orderservice.model.flight.FlightCapacity;
-import com.filiaiev.orderservice.repository.entity.flight.FlightCapacityDO;
+import com.filiaiev.orderservice.model.flight.Flight;
+import com.filiaiev.orderservice.repository.entity.flight.FlightDO;
 import com.filiaiev.orderservice.service.mapper.FlightMapper;
 import io.netty.handler.logging.LogLevel;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
@@ -23,14 +21,14 @@ public class FlightRepository extends ApiRepository {
         this.flightMapper = flightMapper;
     }
 
-    public FlightCapacity getFlightCapacity(Integer flightId) {
+    public Flight getFlight(Integer flightId) {
         return webClient.get().uri(uriBuilder -> uriBuilder
                         .path(FLIGHTS_PATH + "/{flightId}")
                         .build(flightId)
                 )
                 .retrieve()
-                .bodyToMono(FlightCapacityDO.class)
-                .map(flightMapper::mapFlightCapacityDOToFlightCapacity)
+                .bodyToMono(FlightDO.class)
+                .map(flightMapper::mapFlightDOToFlight)
                 .block();
     }
 }

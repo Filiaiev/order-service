@@ -8,6 +8,5 @@ import java.util.List;
 public class CreateOrderRequestRO {
 
     private Integer flightId;
-    private Integer zoneRouteId;
     private List<CreateOrderRequestItemRO> items;
 }

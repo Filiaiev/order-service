@@ -16,7 +16,6 @@ import java.util.List;
 public interface OrderResourceMapper {
 
     @Mapping(target = "customerUserId", constant = "1")
-    @Mapping(target = "createdAt", expression = "java(java.time.Instant.now())")
     CreateOrderRequest mapCreateOrderRequestROToCreateOrderRequest(CreateOrderRequestRO request);
 
     UpdateOrderStatus mapUpdateOrderStatusROToUpdateOrderStatus(UpdateOrderStatusRO updateOrderStatusRO);

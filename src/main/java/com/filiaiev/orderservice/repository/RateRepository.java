@@ -1,5 +1,6 @@
 package com.filiaiev.orderservice.repository;
 
+import com.filiaiev.orderservice.model.charge.CalculateShippingPriceRequest;
 import com.filiaiev.orderservice.model.charge.ShortChargeSummary;
 import com.filiaiev.orderservice.repository.entity.charge.CalculateShippingPriceRequestDO;
 import com.filiaiev.orderservice.repository.entity.charge.ShortChargeSummaryDO;
@@ -28,6 +29,7 @@ public class RateRepository extends ApiRepository {
         return webClient.post()
                 .uri(uriBuilder -> uriBuilder.path(PRICING_PATH).build())
                 .contentType(MediaType.APPLICATION_JSON)
+                .header("Accept", "application/summary-short+json")
                 .bodyValue(request)
                 .retrieve()
                 .bodyToMono(ShortChargeSummaryDO.class)

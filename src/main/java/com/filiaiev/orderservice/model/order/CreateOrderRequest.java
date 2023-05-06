@@ -11,7 +11,6 @@ public class CreateOrderRequest {
 
     private Integer customerUserId;
     private Integer flightId;
-    private Integer zoneRouteId;
     private Instant createdAt;
     private BigDecimal totalShipmentPrice;
     private List<CreateOrderRequestItem> items;

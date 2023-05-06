@@ -47,7 +47,7 @@ public class OrderController {
 
     // Add additional filters
     @GetMapping
-    public List<OrderShortRO> getOrders(@RequestParam Integer userId) {
+    public List<OrderShortRO> getUserOrders(@RequestParam Integer userId) {
         return orderMapper.mapOrdersToOrderShortROs(
                 orderService.getOrders(userId)
         );
