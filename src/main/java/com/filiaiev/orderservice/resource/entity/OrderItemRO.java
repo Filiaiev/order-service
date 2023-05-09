@@ -1,4 +1,4 @@
-package com.filiaiev.orderservice.resource.ro;
+package com.filiaiev.orderservice.resource.entity;
 
 import lombok.Data;
 
@@ -8,10 +8,8 @@ import java.math.BigDecimal;
 public class OrderItemRO {
 
     private Integer quantity;
-    private Double actualWeight;
-    private Double height;
-    private Double width;
-    private Double length;
+    private Double declaredWeight;
+    private DimensionRO dimension;
     private BigDecimal declaredCargoPrice;
     private BigDecimal shippingPrice;
 }

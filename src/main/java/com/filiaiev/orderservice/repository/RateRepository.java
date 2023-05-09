@@ -1,9 +1,8 @@
 package com.filiaiev.orderservice.repository;
 
-import com.filiaiev.orderservice.model.charge.CalculateShippingPriceRequest;
-import com.filiaiev.orderservice.model.charge.ShortChargeSummary;
-import com.filiaiev.orderservice.repository.entity.charge.CalculateShippingPriceRequestDO;
-import com.filiaiev.orderservice.repository.entity.charge.ShortChargeSummaryDO;
+import com.filiaiev.orderservice.model.charge.ChargeSummary;
+import com.filiaiev.orderservice.repository.entity.charge.CreateChargeSummaryRequestDO;
+import com.filiaiev.orderservice.repository.entity.charge.ChargeSummaryDO;
 import com.filiaiev.orderservice.service.mapper.RateServiceMapper;
 import io.netty.handler.logging.LogLevel;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,15 +24,14 @@ public class RateRepository extends ApiRepository {
         this.rateServiceMapper = rateServiceMapper;
     }
 
-    public ShortChargeSummary calculateShippingPrice(CalculateShippingPriceRequestDO request) {
+    public ChargeSummary createChargeSummary(CreateChargeSummaryRequestDO request) {
         return webClient.post()
                 .uri(uriBuilder -> uriBuilder.path(PRICING_PATH).build())
                 .contentType(MediaType.APPLICATION_JSON)
-                .header("Accept", "application/summary-short+json")
                 .bodyValue(request)
                 .retrieve()
-                .bodyToMono(ShortChargeSummaryDO.class)
-                .map(rateServiceMapper::mapShortChargeSummaryDOToShortChargeSummary)
+                .bodyToMono(ChargeSummaryDO.class)
+                .map(rateServiceMapper::mapChargeSummaryDOToChargeSummary)
                 .block();
     }
 }

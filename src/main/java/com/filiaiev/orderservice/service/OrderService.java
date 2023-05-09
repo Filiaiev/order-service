@@ -1,6 +1,6 @@
 package com.filiaiev.orderservice.service;
 
-import com.filiaiev.orderservice.model.charge.ShortChargeSummary;
+import com.filiaiev.orderservice.model.charge.ChargeSummary;
 import com.filiaiev.orderservice.model.flight.Flight;
 import com.filiaiev.orderservice.model.flight.FlightLoad;
 import com.filiaiev.orderservice.model.order.CreateOrderRequest;
@@ -10,7 +10,7 @@ import com.filiaiev.orderservice.model.order.UpdateOrderStatus;
 import com.filiaiev.orderservice.repository.FlightRepository;
 import com.filiaiev.orderservice.repository.OrderRepository;
 import com.filiaiev.orderservice.repository.RateRepository;
-import com.filiaiev.orderservice.repository.entity.charge.CalculateShippingPriceRequestDO;
+import com.filiaiev.orderservice.repository.entity.charge.CreateChargeSummaryRequestDO;
 import com.filiaiev.orderservice.repository.entity.order.OrderDO;
 import com.filiaiev.orderservice.repository.entity.order.OrderStatusDO;
 import com.filiaiev.orderservice.repository.entity.order.UpdateOrderStatusDO;
@@ -20,9 +20,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
 import java.time.Instant;
-import java.time.temporal.TemporalAmount;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -44,7 +42,6 @@ public class OrderService {
     }
 
     private List<Order> getOrdersByFlightId(Integer flightId) {
-        Instant.now().minus(Duration.ofHours(6));
         return orderMapper.mapOrderDOsToOrders(
                 orderRepository.findAllByFlightId(flightId)
         );
@@ -56,9 +53,9 @@ public class OrderService {
         return orderMapper.mapOrderDOsToOrders(customerOrders);
     }
 
-    public void createOrder(CreateOrderRequest createOrder) {
-        Order shippingOrder = orderMapper.mapCreateOrderRequestToOrder(createOrder);
-
+    public void createOrder(Order shippingOrder) {
+//        Order shippingOrder = orderMapper.mapCreateOrderRequestToOrder(createOrder);
+//
         Flight flight = flightRepository.getFlight(shippingOrder.getFlightId());
 
         validateOrder(shippingOrder, flight);
@@ -83,13 +80,14 @@ public class OrderService {
     }
 
     private void enrichOrderWithPrice(Order shippingOrder, Flight flight) {
-        CalculateShippingPriceRequestDO request =
+        CreateChargeSummaryRequestDO request =
                 orderMapper.mapOrderToCalculateShippingPriceRequestDO(shippingOrder, flight);
-        ShortChargeSummary chargeSummary = rateRepository.calculateShippingPrice(request);
+
+        ChargeSummary chargeSummary = rateRepository.createChargeSummary(request);
 
         for (int i = 0; i < shippingOrder.getItems().size(); i++) {
-            shippingOrder.getItems().get(i).setShippingPrice(
-                    chargeSummary.getItemsPriceList().get(i)
+            shippingOrder.getItems().get(i).setItemCharges(
+                    orderMapper.mapChargeSummaryToOrderItemCharges(chargeSummary, i)
             );
         }
 
@@ -98,7 +96,7 @@ public class OrderService {
 
     private boolean validateOrder(Order order, Flight flight) {
         isBookable(flight);
-        validateFlightLoad(order, flight);
+        hasEnoughCapacity(flight, order);
 
         return true;
     }
@@ -111,13 +109,15 @@ public class OrderService {
         return true;
     }
 
-    private void validateFlightLoad(Order order, Flight flight) {
+    private boolean hasEnoughCapacity(Flight flight, Order order) {
         FlightLoad loadAfterOrder = getPotentialFlightLoad(order);
         FlightLoad maxFlightLoad = new FlightLoad(flight.getMaxPayload(), flight.getMaxVolume());
 
         if (loadAfterOrder.compareTo(maxFlightLoad) > 0) {
             throw new IllegalArgumentException("Not enough capacity");
         }
+
+        return true;
     }
 
     private FlightLoad getPotentialFlightLoad(Order order) {

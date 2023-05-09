@@ -5,12 +5,10 @@ import lombok.Data;
 import java.math.BigDecimal;
 
 @Data
-public class CalculateShippingPriceRequestItemDO {
+public class CreateChargeSummaryRequestItemDO {
 
     private Integer quantity;
-    private Double actualWeight;
-    private Double height;
-    private Double width;
-    private Double length;
+    private Double declaredWeight;
+    private DimensionDO dimension;
     private BigDecimal declaredCargoPrice;
 }

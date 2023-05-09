@@ -1,12 +1,12 @@
 package com.filiaiev.orderservice.resource;
 
-import com.filiaiev.orderservice.model.order.CreateOrderRequest;
+import com.filiaiev.orderservice.model.order.Order;
 import com.filiaiev.orderservice.model.order.UpdateOrderStatus;
 import com.filiaiev.orderservice.resource.mapper.OrderResourceMapper;
-import com.filiaiev.orderservice.resource.ro.CreateOrderRequestRO;
-import com.filiaiev.orderservice.resource.ro.OrderDetailedRO;
-import com.filiaiev.orderservice.resource.ro.OrderShortRO;
-import com.filiaiev.orderservice.resource.ro.UpdateOrderStatusRO;
+import com.filiaiev.orderservice.resource.entity.CreateOrderRequestRO;
+import com.filiaiev.orderservice.resource.entity.OrderDetailedRO;
+import com.filiaiev.orderservice.resource.entity.OrderShortRO;
+import com.filiaiev.orderservice.resource.entity.UpdateOrderStatusRO;
 import com.filiaiev.orderservice.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,10 +25,11 @@ public class OrderController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public void createOrder(@RequestBody CreateOrderRequestRO createOrderRequestRO) {
-        CreateOrderRequest createOrderRequest =
-                orderMapper.mapCreateOrderRequestROToCreateOrderRequest(createOrderRequestRO);
+//        CreateOrderRequest createOrderRequest =
+//                orderMapper.mapCreateOrderRequestROToCreateOrderRequest(createOrderRequestRO);
+        Order createOrder = orderMapper.mapCreateOrderRequestROToOrder(createOrderRequestRO);
 
-        orderService.createOrder(createOrderRequest);
+        orderService.createOrder(createOrder);
     }
 
     @GetMapping(value = "/{orderId}", produces = "application/order-short+json")

@@ -6,8 +6,8 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Data
-public class ShortChargeSummaryDO {
+public class ChargeSummaryItemDO {
 
-    private List<BigDecimal> itemsPriceList;
+    private List<ItemChargeDO> itemBreakdown;
     private BigDecimal total;
 }

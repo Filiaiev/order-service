@@ -12,8 +12,6 @@ public class CreateOrderRequestItem {
     private Integer shippingOrderId;
     private Integer quantity;
     private Double actualWeight;
-    private Double height;
-    private Double width;
-    private Double length;
+    private Dimension dimension;
     private BigDecimal declaredCargoPrice;
 }

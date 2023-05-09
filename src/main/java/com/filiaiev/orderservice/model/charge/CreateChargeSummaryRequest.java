@@ -5,7 +5,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class CalculateShippingPriceRequest {
+public class CreateChargeSummaryRequest {
 
     private Integer zoneRouteId;
     private List<CreateChargeSummaryRequestItem> items;

@@ -1,8 +1,10 @@
 package com.filiaiev.orderservice.service.mapper;
 
+import com.filiaiev.orderservice.model.charge.ChargeSummary;
+import com.filiaiev.orderservice.model.charge.ItemCharge;
 import com.filiaiev.orderservice.model.flight.Flight;
 import com.filiaiev.orderservice.model.order.*;
-import com.filiaiev.orderservice.repository.entity.charge.CalculateShippingPriceRequestDO;
+import com.filiaiev.orderservice.repository.entity.charge.CreateChargeSummaryRequestDO;
 import com.filiaiev.orderservice.repository.entity.order.OrderDO;
 import com.filiaiev.orderservice.repository.entity.order.OrderItemDO;
 import com.filiaiev.orderservice.repository.entity.order.OrderStatusDO;
@@ -32,7 +34,7 @@ public interface OrderServiceMapper {
     }
 
     @Mapping(target = "zoneRouteId", source = "flight.chargeableZoneRouteId")
-    CalculateShippingPriceRequestDO mapOrderToCalculateShippingPriceRequestDO(Order order, Flight flight);
+    CreateChargeSummaryRequestDO mapOrderToCalculateShippingPriceRequestDO(Order order, Flight flight);
 
     @Mapping(target = "status", constant = "AWAITING_WAREHOUSE_SHIPPING")
     Order mapCreateOrderRequestToOrder(CreateOrderRequest request);
@@ -47,11 +49,39 @@ public interface OrderServiceMapper {
 
     List<OrderItemDO> mapOrderItemsToOrderItemDOs(List<OrderItem> orderItems);
 
+    @Mapping(target = "height", source = "dimension.height")
+    @Mapping(target = "width", source = "dimension.width")
+    @Mapping(target = "length", source = "dimension.length")
+    OrderItemDO mapOrderItemTOOrderItemDO(OrderItem orderItem);
+
+    @Mapping(source = "height", target = "dimension.height")
+    @Mapping(source = "width", target = "dimension.width")
+    @Mapping(source = "length", target = "dimension.length")
+    OrderItem mapOrderItemDOToOrderItem(OrderItemDO orderItemDO);
+
     default List<OrderItemDO> mapOrderItemsToOrderItemDOs(List<OrderItem> orderItems, OrderDO orderDO) {
         List<OrderItemDO> orderItemDOs = mapOrderItemsToOrderItemDOs(orderItems);
 
         orderItemDOs.forEach(order -> order.setShippingOrder(orderDO));
 
+        for (OrderItemDO item : orderItemDOs) {
+            item.setShippingOrder(orderDO);
+            item.getItemCharges().forEach(ic -> ic.setOrderItem(item));
+        }
+
         return orderItemDOs;
     }
+
+    default List<OrderItemCharge> mapChargeSummaryToOrderItemCharges(ChargeSummary chargeSummary, int index) {
+        if (chargeSummary.getItemsBreakdown() == null) {
+            return null;
+        }
+
+        return mapItemChargesToOrderItemCharges(
+                chargeSummary.getItemsBreakdown().get(index).getItemBreakdown()
+        );
+    }
+
+    List<OrderItemCharge> mapItemChargesToOrderItemCharges(List<ItemCharge> itemCharges);
+
 }

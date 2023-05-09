@@ -14,13 +14,13 @@ public class OrderUtilsTest {
     public void testGetTotalLoad() {
         Order order = new Order();
         OrderItem orderItem = new OrderItem();
-        orderItem.setActualWeight(500.0);
+        orderItem.setDeclaredWeight(500.0);
         orderItem.setHeight(3.0);
         orderItem.setWidth(5.5);
         orderItem.setLength(2.25);
 
         OrderItem orderItem2 = new OrderItem();
-        orderItem2.setActualWeight(500.0);
+        orderItem2.setDeclaredWeight(500.0);
         orderItem2.setHeight(3.0);
         orderItem2.setWidth(5.5);
         orderItem2.setLength(2.25);

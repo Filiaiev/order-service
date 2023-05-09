@@ -1,15 +1,5 @@
 package com.filiaiev.orderservice.service.mapper;
 
-import com.filiaiev.orderservice.model.order.CreateOrderRequest;
-import com.filiaiev.orderservice.model.order.CreateOrderRequestItem;
-import com.filiaiev.orderservice.repository.entity.charge.CalculateShippingPriceRequestDO;
-import com.filiaiev.orderservice.repository.entity.charge.CalculateShippingPriceRequestItemDO;
-import org.junit.jupiter.api.Test;
-
-import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class RateServiceMapperTest {
@@ -34,10 +24,10 @@ public class RateServiceMapperTest {
 //        createOrderRequest.setZoneRouteId(zoneRouteId);
 //        createOrderRequest.setItems(items);
 //
-//        CalculateShippingPriceRequestDO actual =
+//        CreateChargeSummaryRequestDO actual =
 //                rateMapper.mapCreateOrderRequestToOrder(createOrderRequest);
 //
-//        CalculateShippingPriceRequestItemDO actualItem = actual.getItems().get(0);
+//        CreateChargeSummaryRequestItemDO actualItem = actual.getItems().get(0);
 //
 //        assertEquals(1, actual.getZoneRouteId());
 //        assertEquals(1, actual.getItems().size());

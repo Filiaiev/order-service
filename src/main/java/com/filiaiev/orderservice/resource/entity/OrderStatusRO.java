@@ -1,4 +1,4 @@
-package com.filiaiev.orderservice.resource.ro;
+package com.filiaiev.orderservice.resource.entity;
 
 public enum OrderStatusRO {
 
