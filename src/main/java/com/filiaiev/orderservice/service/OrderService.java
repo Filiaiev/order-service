@@ -1,9 +1,10 @@
 package com.filiaiev.orderservice.service;
 
+import com.filiaiev.orderservice.exception.OrderException;
+import com.filiaiev.orderservice.model.UserRole;
 import com.filiaiev.orderservice.model.charge.ChargeSummary;
 import com.filiaiev.orderservice.model.flight.Flight;
 import com.filiaiev.orderservice.model.flight.FlightLoad;
-import com.filiaiev.orderservice.model.order.CreateOrderRequest;
 import com.filiaiev.orderservice.model.order.Order;
 import com.filiaiev.orderservice.model.order.OrderStatus;
 import com.filiaiev.orderservice.model.order.UpdateOrderStatus;
@@ -16,17 +17,24 @@ import com.filiaiev.orderservice.repository.entity.order.OrderStatusDO;
 import com.filiaiev.orderservice.repository.entity.order.UpdateOrderStatusDO;
 import com.filiaiev.orderservice.service.mapper.OrderServiceMapper;
 import com.filiaiev.orderservice.service.utils.OrderUtils;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class OrderService {
+
+    public static final String FLIGHT_IS_NOT_AVAILABLE_TO_BOOK = "Flight is not available to book";
 
     private final OrderRepository orderRepository;
     private final RateRepository rateRepository;
@@ -34,11 +42,15 @@ public class OrderService {
 
     private final OrderServiceMapper orderMapper;
 
-    public Order getOrder(Integer orderId) {
+    public Order getOrder(Integer orderId, Authentication authentication) {
         OrderDO order = orderRepository.findById(orderId)
-                .orElseThrow(EntityNotFoundException::new);
+                .orElseThrow(() -> new OrderException("Order not found", HttpStatus.NOT_FOUND));
 
-        return orderMapper.mapOrderDOToOrder(order);
+        Order orderEntity = orderMapper.mapOrderDOToOrder(order);
+
+        validateUserOrder(authentication, orderEntity);
+
+        return orderEntity;
     }
 
     private List<Order> getOrdersByFlightId(Integer flightId) {
@@ -54,8 +66,6 @@ public class OrderService {
     }
 
     public void createOrder(Order shippingOrder) {
-//        Order shippingOrder = orderMapper.mapCreateOrderRequestToOrder(createOrder);
-//
         Flight flight = flightRepository.getFlight(shippingOrder.getFlightId());
 
         validateOrder(shippingOrder, flight);
@@ -72,11 +82,17 @@ public class OrderService {
         );
     }
 
-    public void cancelOrder(Integer orderId) {
-        orderRepository.updateOrderStatus(orderId, UpdateOrderStatusDO.builder()
-                .orderStatus(OrderStatusDO.TERMINATED)
-                .build()
-        );
+    public void cancelOrder(Integer orderId, Authentication authentication) {
+        OrderDO orderDO = orderRepository.getReferenceById(orderId);
+        Order order = orderMapper.mapOrderDOToOrder(orderDO);
+
+        validateUserOrder(authentication, order);
+
+        order.setStatus(OrderStatus.TERMINATED);
+
+        OrderDO updatedOrder = orderMapper.mapOrderToOrderDO(order);
+
+        orderRepository.save(updatedOrder);
     }
 
     private void enrichOrderWithPrice(Order shippingOrder, Flight flight) {
@@ -103,7 +119,7 @@ public class OrderService {
 
     private boolean isBookable(Flight flight) {
         if (Instant.now().isAfter(flight.getBookableUntil())) {
-            throw new IllegalArgumentException("Ability to book expired");
+            throw new OrderException(FLIGHT_IS_NOT_AVAILABLE_TO_BOOK + ": booking time window expired");
         }
 
         return true;
@@ -114,7 +130,7 @@ public class OrderService {
         FlightLoad maxFlightLoad = new FlightLoad(flight.getMaxPayload(), flight.getMaxVolume());
 
         if (loadAfterOrder.compareTo(maxFlightLoad) > 0) {
-            throw new IllegalArgumentException("Not enough capacity");
+            throw new OrderException(FLIGHT_IS_NOT_AVAILABLE_TO_BOOK + ": not enough capacity");
         }
 
         return true;
@@ -128,6 +144,20 @@ public class OrderService {
         flightOrders.add(order);
 
         return OrderUtils.getTotalLoad(flightOrders);
+    }
+
+    private boolean validateUserOrder(Authentication authentication, Order order) {
+        Set<String> authorities = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toSet());
+
+        if (authorities.contains(UserRole.ROLE_CUSTOMER.name()) &&
+                authentication.getPrincipal() != order.getCustomerUserId()) {
+
+            throw new OrderException("Access denied", HttpStatus.FORBIDDEN);
+        }
+
+        return true;
     }
 
 }

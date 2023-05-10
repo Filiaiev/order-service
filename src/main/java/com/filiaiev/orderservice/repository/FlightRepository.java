@@ -5,6 +5,8 @@ import com.filiaiev.orderservice.repository.entity.flight.FlightDO;
 import com.filiaiev.orderservice.service.mapper.FlightMapper;
 import io.netty.handler.logging.LogLevel;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -27,6 +29,7 @@ public class FlightRepository extends ApiRepository {
                         .build(flightId)
                 )
                 .retrieve()
+                .onStatus(HttpStatusCode::isError, handleError("Error getting flight"))
                 .bodyToMono(FlightDO.class)
                 .map(flightMapper::mapFlightDOToFlight)
                 .block();

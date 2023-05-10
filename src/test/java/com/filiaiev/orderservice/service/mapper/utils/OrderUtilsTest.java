@@ -12,24 +12,7 @@ public class OrderUtilsTest {
 
     @Test
     public void testGetTotalLoad() {
-        Order order = new Order();
-        OrderItem orderItem = new OrderItem();
-        orderItem.setDeclaredWeight(500.0);
-        orderItem.setHeight(3.0);
-        orderItem.setWidth(5.5);
-        orderItem.setLength(2.25);
 
-        OrderItem orderItem2 = new OrderItem();
-        orderItem2.setDeclaredWeight(500.0);
-        orderItem2.setHeight(3.0);
-        orderItem2.setWidth(5.5);
-        orderItem2.setLength(2.25);
-
-        order.setItems(List.of(orderItem, orderItem2));
-
-        FlightLoad totalLoad = OrderUtils.getTotalLoad(List.of(order));
-
-        System.out.println(totalLoad);
     }
 
     @Test

@@ -5,6 +5,7 @@ import com.filiaiev.orderservice.resource.entity.*;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
+import org.springframework.security.core.Authentication;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -12,12 +13,9 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface OrderResourceMapper {
 
-    @Mapping(target = "customerUserId", constant = "1")
-    CreateOrderRequest mapCreateOrderRequestROToCreateOrderRequest(CreateOrderRequestRO request);
-
     @Mapping(target = "status", constant = "AWAITING_WAREHOUSE_SHIPPING")
-    @Mapping(target = "customerUserId", constant = "1")
-    Order mapCreateOrderRequestROToOrder(CreateOrderRequestRO requestRO);
+    @Mapping(target = "customerUserId", expression = "java((Integer) authentication.getPrincipal())")
+    Order mapCreateOrderRequestROToOrder(CreateOrderRequestRO requestRO, Authentication authentication);
 
     UpdateOrderStatus mapUpdateOrderStatusROToUpdateOrderStatus(UpdateOrderStatusRO updateOrderStatusRO);
 

@@ -10,6 +10,9 @@ import com.filiaiev.orderservice.resource.entity.UpdateOrderStatusRO;
 import com.filiaiev.orderservice.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,38 +25,38 @@ public class OrderController {
     private final OrderService orderService;
     private final OrderResourceMapper orderMapper;
 
+    @PreAuthorize("hasRole('CUSTOMER')")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public void createOrder(@RequestBody CreateOrderRequestRO createOrderRequestRO) {
-//        CreateOrderRequest createOrderRequest =
-//                orderMapper.mapCreateOrderRequestROToCreateOrderRequest(createOrderRequestRO);
-        Order createOrder = orderMapper.mapCreateOrderRequestROToOrder(createOrderRequestRO);
+    public void createOrder(@RequestBody CreateOrderRequestRO createOrderRequestRO, Authentication authentication) {
+        Order createOrder = orderMapper.mapCreateOrderRequestROToOrder(createOrderRequestRO, authentication);
 
         orderService.createOrder(createOrder);
     }
 
     @GetMapping(value = "/{orderId}", produces = "application/order-short+json")
-    public OrderShortRO getOrderShort(@PathVariable Integer orderId) {
+    public OrderShortRO getOrderShort(@PathVariable Integer orderId, Authentication authentication) {
         return orderMapper.mapOrderToOrderShortRO(
-                orderService.getOrder(orderId)
+                orderService.getOrder(orderId, authentication)
         );
     }
 
     @GetMapping(value = "/{orderId}", produces = "application/order-detailed+json")
-    public OrderDetailedRO getOrderDetailed(@PathVariable Integer orderId) {
+    public OrderDetailedRO getOrderDetailed(@PathVariable Integer orderId, Authentication authentication) {
         return orderMapper.mapOrderToOrderDetailedRO(
-                orderService.getOrder(orderId)
+                orderService.getOrder(orderId, authentication)
         );
     }
 
-    // Add additional filters
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER') or hasRole('CUSTOMER') and principal == #userId")
     @GetMapping
-    public List<OrderShortRO> getUserOrders(@RequestParam Integer userId) {
+    public List<OrderShortRO> getOrders(@RequestParam Integer userId) {
         return orderMapper.mapOrdersToOrderShortROs(
                 orderService.getOrders(userId)
         );
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @PatchMapping("/{orderId}/status")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateOrderStatus(@PathVariable Integer orderId, @RequestBody UpdateOrderStatusRO updateRequestRO) {
@@ -63,7 +66,7 @@ public class OrderController {
 
     @DeleteMapping("/{orderId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void cancelOrder(@PathVariable Integer orderId) {
-        orderService.cancelOrder(orderId);
+    public void cancelOrder(@PathVariable Integer orderId, Authentication authentication) {
+        orderService.cancelOrder(orderId, authentication);
     }
 }

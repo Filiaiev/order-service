@@ -7,6 +7,7 @@ import com.filiaiev.orderservice.service.mapper.RateServiceMapper;
 import io.netty.handler.logging.LogLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Repository;
 
@@ -30,6 +31,7 @@ public class RateRepository extends ApiRepository {
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
                 .retrieve()
+                .onStatus(HttpStatusCode::isError, handleError("Error creating charge summary"))
                 .bodyToMono(ChargeSummaryDO.class)
                 .map(rateServiceMapper::mapChargeSummaryDOToChargeSummary)
                 .block();
